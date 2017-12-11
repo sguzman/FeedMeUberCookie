@@ -1,11 +1,11 @@
 package com.github.sguzman.scala.uber.data
 
-import com.github.sguzman.scala.uber.data.typesafe.email.input.{Answer, Email, UserIdentifier}
-import com.github.sguzman.scala.uber.data.typesafe.email.output.PostResponse
-import com.github.sguzman.scala.uber.data.typesafe.password
-import com.github.sguzman.scala.uber.data.typesafe.password.Password
-import com.github.sguzman.scala.uber.data.typesafe.sms.input.SMS
-import com.github.sguzman.scala.uber.data.typesafe.sms.output.SMSOutput
+import com.github.sguzman.scala.uber.data.typesafe.login.email.input.{Answer, Email, UserIdentifier}
+import com.github.sguzman.scala.uber.data.typesafe.login.email.output.PostResponse
+import com.github.sguzman.scala.uber.data.typesafe.login.password
+import com.github.sguzman.scala.uber.data.typesafe.login.password.Password
+import com.github.sguzman.scala.uber.data.typesafe.login.sms.input.SMS
+import com.github.sguzman.scala.uber.data.typesafe.login.sms.output.SMSOutput
 import org.feijoas.mango.common.base.Preconditions
 
 import io.circe.parser.decode
