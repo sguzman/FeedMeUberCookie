@@ -1,5 +1,5 @@
 package com.github.sguzman.scala.uber.login.typesafe.email.output
 
-case class EmailResponse(
+case class PostResponse(
                         stage: Stage
                         )

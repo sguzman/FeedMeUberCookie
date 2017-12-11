@@ -1,7 +1,7 @@
 package com.github.sguzman.scala.uber.login
 
 import com.github.sguzman.scala.uber.login.typesafe.email.input.{Answer, Email, UserIdentifier}
-import com.github.sguzman.scala.uber.login.typesafe.email.output.EmailResponse
+import com.github.sguzman.scala.uber.login.typesafe.email.output.PostResponse
 import com.github.sguzman.scala.uber.login.typesafe.password
 import com.github.sguzman.scala.uber.login.typesafe.password.Password
 import com.github.sguzman.scala.uber.login.typesafe.sms.input.SMS
@@ -23,11 +23,11 @@ object Main {
 
       val responsePostEmail = postEmail(responseLoginPage, user)
       println(responsePostEmail.body)
-      println(decode[EmailResponse](responsePostEmail.body))
+      println(decode[PostResponse](responsePostEmail.body))
 
       val responsePostPass = postPassword(responsePostEmail, pass)
       println(responsePostPass.body)
-      println(decode[EmailResponse](responsePostPass.body))
+      println(decode[PostResponse](responsePostPass.body))
 
       val sms = StdIn.readLine("Enter SMS: ")
       val responsePostSMS = postSMS(responsePostPass, responsePostEmail.cookies.mkString("; "), sms)
