@@ -1,5 +1,7 @@
 package com.github.sguzman.scala.uber.data
 
+import java.net.SocketTimeoutException
+
 import com.github.sguzman.scala.uber.data.typesafe.data.all_data.AllDataStatement
 import com.github.sguzman.scala.uber.data.typesafe.data.statement.Statement
 import com.github.sguzman.scala.uber.data.typesafe.verify.PlatformChromeNavData
@@ -20,16 +22,10 @@ object Main {
 
       assertCookie(cookies)
       val allData = getAllData(cookies)
-      val statementPreviews = allData.map(_.uuid).par.map(u => {
-        val url = s"https://partners.uber.com/p3/money/statements/view/$u"
-        println(url)
-        val request = Http(url).header("Cookie", cookies)
-        val response = request.asString
-        val body = decode[Statement](response.body)
-        println(url, body)
-        Preconditions.checkArgument(body.isRight)
-        body.right.get
-      })
+      val statementPreviews = allData
+        .map(_.uuid)
+        .par
+        .map(u => getStatement(cookies, u.toString))
 
       statementPreviews foreach println
 
@@ -59,5 +55,25 @@ object Main {
     Preconditions.checkArgument(allDataObj.isRight)
 
     allDataObj.right.get
+  }
+
+  def getStatement(cookies: String, uuid: String): Statement = util.Try({
+    val url = s"https://partners.uber.com/p3/money/statements/view/$uuid"
+    println(url)
+    val request = Http(url).header("Cookie", cookies)
+    val response = request.asString
+    if (response.code == 429) {
+      getStatement(cookies, uuid)
+    }
+    else {
+      val body = decode[Statement](response.body)
+      Preconditions.checkArgument(body.isRight)
+      body.right.get
+    }
+  }) match {
+    case Success(v) => v
+    case Failure(e) => e match {
+      case _: SocketTimeoutException => getStatement(cookies, uuid)
+    }
   }
 }
