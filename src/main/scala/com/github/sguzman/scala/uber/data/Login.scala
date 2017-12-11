@@ -88,7 +88,7 @@ object Login {
 
   def postSMS(response: HttpResponse[String], cookies: String, smsMsg: String): HttpResponse[String] = {
     val postURL = "https://auth.uber.com/login/handleanswer"
-    val payload = SMS(typesafe.sms.input.Answer(smsMsg, "SMS_OTP"))
+    val payload = SMS(typesafe.login.sms.input.Answer(smsMsg, "SMS_OTP"))
 
     val smsBody = payload.asJson.toString
     val requestSMS = Http(postURL)
