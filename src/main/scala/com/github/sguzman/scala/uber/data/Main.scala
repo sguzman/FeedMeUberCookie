@@ -1,11 +1,11 @@
 package com.github.sguzman.scala.uber.data
 
+import com.github.sguzman.scala.uber.data.typesafe.data.all_data.AllDataStatement
 import com.github.sguzman.scala.uber.data.typesafe.verify.PlatformChromeNavData
 import org.feijoas.mango.common.base.Preconditions
 
 import scala.util.{Failure, Success}
 import scalaj.http.Http
-
 import io.circe.parser.decode
 import io.circe.generic.auto._
 
@@ -25,7 +25,17 @@ object Main {
       println(checkBody)
 
       val checkObj = decode[PlatformChromeNavData](checkBody)
-      println(checkObj)
+      Preconditions.checkArgument(checkObj.isRight)
+      println(checkObj.right.get)
+
+      val allDataUrl = "https://partners.uber.com/p3/money/statements/all_data/"
+      val allDataRequest = Http(allDataUrl).header("Cookie", cookies)
+      val allDataResponse = allDataRequest.asString
+
+      val allDataBody = allDataResponse.body
+      val allDataObj = decode[Array[AllDataStatement]](allDataBody)
+      Preconditions.checkArgument(allDataObj.isRight)
+      println(allDataObj.right.get)
     }) match {
       case Success(_) => println("Done")
       case Failure(e) => Console.err.println(e)
