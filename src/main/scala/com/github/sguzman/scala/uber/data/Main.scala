@@ -20,7 +20,10 @@ object Main {
       val url = "https://partners.uber.com/p3/platform_chrome_nav_data"
       val checkRequest = Http(url).header("Cookie", cookies)
       val checkResponse = checkRequest.asString
+
       val checkBody = checkResponse.body
+      println(checkBody)
+
       val checkObj = decode[PlatformChromeNavData](checkBody)
       println(checkObj)
     }) match {
