@@ -2,7 +2,8 @@ package com.github.sguzman.scala.uber.login
 
 import com.github.sguzman.scala.uber.login.typesafe.email.input.{Answer, Email, UserIdentifier}
 import com.github.sguzman.scala.uber.login.typesafe.email.output.EmailResponse
-import com.github.sguzman.scala.uber.login.typesafe.password.input.Password
+import com.github.sguzman.scala.uber.login.typesafe.password
+import com.github.sguzman.scala.uber.login.typesafe.password.Password
 import com.github.sguzman.scala.uber.login.typesafe.sms.input.SMS
 import com.github.sguzman.scala.uber.login.typesafe.sms.output.SMSOutput
 import io.circe.generic.auto._
@@ -68,7 +69,7 @@ object Main {
 
   def postPassword(response: HttpResponse[String], pass: String): HttpResponse[String] = {
     val postURL = "https://auth.uber.com/login/handleanswer"
-    val payload = Password(typesafe.password.input.Answer(pass, "VERIFY_PASSWORD"), rememberMe = true)
+    val payload = Password(password.Answer(pass, "VERIFY_PASSWORD"), rememberMe = true)
 
     val passBody = payload.asJson.toString
     val requestPass = Http(postURL)

@@ -1,4 +1,4 @@
-package com.github.sguzman.scala.uber.login.typesafe.password.input
+package com.github.sguzman.scala.uber.login.typesafe.password
 
 case class Password(
                    answer: Answer,
