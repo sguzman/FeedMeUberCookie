@@ -5,8 +5,7 @@ import scala.util.{Failure, Success}
 object Main {
   def main(args: Array[String]): Unit = {
     util.Try({
-      val response = Login
-
+      val response = Login.apply
     }) match {
       case Success(_) => println("Done")
       case Failure(e) => Console.err.println(e)
