@@ -1,6 +1,7 @@
 package com.github.sguzman.scala.uber.data
 
 import com.github.sguzman.scala.uber.data.typesafe.data.all_data.AllDataStatement
+import com.github.sguzman.scala.uber.data.typesafe.data.statement.Statement
 import com.github.sguzman.scala.uber.data.typesafe.verify.PlatformChromeNavData
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -19,7 +20,18 @@ object Main {
 
       assertCookie(cookies)
       val allData = getAllData(cookies)
-      println(allData)
+      val statementPreviews = allData.map(_.uuid).par.map(u => {
+        val url = s"https://partners.uber.com/p3/money/statements/view/$u"
+        println(url)
+        val request = Http(url).header("Cookie", cookies)
+        val response = request.asString
+        val body = decode[Statement](response.body)
+        println(url, body)
+        Preconditions.checkArgument(body.isRight)
+        body.right.get
+      })
+
+      statementPreviews foreach println
 
     }) match {
       case Success(_) => println("Done")
