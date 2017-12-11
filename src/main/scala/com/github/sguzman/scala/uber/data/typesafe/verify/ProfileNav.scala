@@ -4,6 +4,6 @@ case class ProfileNav(
                      documents: Documents,
                      profile: ProfileProfile,
                      vehicles: Vehicles,
-                     primarySideNav: Int,
-                     url: String
+                     primarySideNav: Option[Int],
+                     url: Option[String]
                      )

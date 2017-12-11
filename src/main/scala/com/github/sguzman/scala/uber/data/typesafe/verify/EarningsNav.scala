@@ -5,5 +5,5 @@ case class EarningsNav(
                       instantPay: InstantPay,
                       paymentStatements: PaymentStatements,
                       taxes: Taxes,
-                      primarySideNav: Int
+                      primarySideNav: Option[Int]
                       )

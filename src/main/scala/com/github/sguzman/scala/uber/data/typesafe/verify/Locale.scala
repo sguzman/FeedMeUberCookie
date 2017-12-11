@@ -4,5 +4,5 @@ case class Locale(
                  dir: String,
                  label: String,
                  localeCode: String,
-                 localeResource: String
+                 localeResource: Option[String]
                  )
