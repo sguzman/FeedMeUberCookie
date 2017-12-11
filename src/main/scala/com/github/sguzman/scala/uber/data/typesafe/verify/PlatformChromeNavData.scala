@@ -6,6 +6,6 @@ case class PlatformChromeNavData(
                                 locale: Locale,
                                 nav: Nav,
                                 rating: Rating,
-                                traslation: Map[String,String],
+                                translations: Map[String,String],
                                 user: User
                                 )
