@@ -23,17 +23,27 @@ object Main {
 
       val responsePostEmail = postEmail(responseLoginPage, user)
       println(responsePostEmail.body)
-      println(decode[PostResponse](responsePostEmail.body))
+
+      val rightyEmail = decode[PostResponse](responsePostEmail.body)
+      Preconditions.checkArgument(rightyEmail.isRight)
+      println(rightyEmail)
 
       val responsePostPass = postPassword(responsePostEmail, pass)
       println(responsePostPass.body)
-      println(decode[PostResponse](responsePostPass.body))
+      val rightyPass = decode[PostResponse](responsePostPass.body)
+      Preconditions.checkArgument(rightyPass.isRight)
+      println(rightyPass)
 
       val sms = StdIn.readLine("Enter SMS: ")
       val responsePostSMS = postSMS(responsePostPass, responsePostEmail.cookies.mkString("; "), sms)
       println(responsePostSMS.statusLine)
       println(responsePostSMS.body)
-      println(decode[SMSOutput](responsePostSMS.body))
+
+      val rightySMS = decode[SMSOutput](responsePostSMS.body)
+      Preconditions.checkArgument(rightySMS.isRight)
+      println(rightySMS)
+
+
     }) match {
       case Success(_) => println("Done")
       case Failure(e) => Console.err.println(e)
