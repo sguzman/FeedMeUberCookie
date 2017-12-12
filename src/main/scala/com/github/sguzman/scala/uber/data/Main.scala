@@ -4,6 +4,7 @@ import java.net.SocketTimeoutException
 
 import com.github.sguzman.scala.uber.data.typesafe.data.all_data.AllDataStatement
 import com.github.sguzman.scala.uber.data.typesafe.data.statement.Statement
+import com.github.sguzman.scala.uber.data.typesafe.data.trip.Trip
 import com.github.sguzman.scala.uber.data.typesafe.verify.PlatformChromeNavData
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -21,13 +22,20 @@ object Main {
       Preconditions.checkNotNull(cookies)
 
       assertCookie(cookies)
+      val statement = getStatement(cookies, _: String)
+      val trip = getTrip(cookies, _: String)
+
       val allData = getAllData(cookies)
       val statementPreviews = allData
-        .map(_.uuid)
         .par
-        .map(u => getStatement(cookies, u.toString))
+        .map(_.uuid)
+        .map(_.toString)
+        .map(statement)
+        .flatMap(_.body.driver.trip_earnings.trips.keySet.toList)
+        .map(_.toString)
+        .map(trip)
 
-      statementPreviews foreach println
+      println(statementPreviews.toList)
 
     }) match {
       case Success(_) => println("Done")
@@ -59,13 +67,14 @@ object Main {
 
   def getStatement(cookies: String, uuid: String): Statement = util.Try({
     val url = s"https://partners.uber.com/p3/money/statements/view/$uuid"
-    println(url)
     val request = Http(url).header("Cookie", cookies)
     val response = request.asString
+
     if (response.code == 429) {
       getStatement(cookies, uuid)
     }
     else {
+      println(s"Success $url")
       val body = decode[Statement](response.body)
       Preconditions.checkArgument(body.isRight)
       body.right.get
@@ -74,6 +83,26 @@ object Main {
     case Success(v) => v
     case Failure(e) => e match {
       case _: SocketTimeoutException => getStatement(cookies, uuid)
+    }
+  }
+
+  def getTrip(cookies: String, uuid: String): Trip = util.Try({
+    val url = s"https://partners.uber.com/p3/money/trips/trip_data/$uuid"
+    val request = Http(url).header("Cookie", cookies)
+    val response = request.asString
+
+    if (response.code == 429) {
+      getTrip(cookies, uuid)
+    } else {
+      println(s"Success $url")
+      val body = decode[Trip](response.body)
+      Preconditions.checkArgument(body.isRight)
+      body.right.get
+    }
+  }) match {
+    case Success(v) => v
+    case Failure(e) => e match {
+      case _: SocketTimeoutException => getTrip(cookies, uuid)
     }
   }
 }
