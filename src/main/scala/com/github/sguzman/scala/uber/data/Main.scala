@@ -18,9 +18,9 @@ import scalaj.http.Http
 object Main {
   def main(args: Array[String]): Unit = {
     util.Try({
-      //val response = Login.apply
+      val response = Login.apply
 
-      val cookies = System.getenv("COOKIES")
+      val cookies = response.cookies.mkString("; ")
       Preconditions.checkNotNull(cookies)
 
       assertCookie(cookies)
