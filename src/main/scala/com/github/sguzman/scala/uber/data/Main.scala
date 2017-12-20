@@ -1,5 +1,6 @@
 package com.github.sguzman.scala.uber.data
 
+import java.io.{File, PrintWriter}
 import java.net.SocketTimeoutException
 
 import com.github.sguzman.scala.uber.data.typesafe.data.all_data.AllDataStatement
@@ -8,6 +9,7 @@ import com.github.sguzman.scala.uber.data.typesafe.data.trip.Trip
 import com.github.sguzman.scala.uber.data.typesafe.verify.PlatformChromeNavData
 import io.circe.generic.auto._
 import io.circe.parser.decode
+import io.circe.syntax._
 import org.feijoas.mango.common.base.Preconditions
 
 import scala.util.{Failure, Success}
@@ -34,8 +36,15 @@ object Main {
         .flatMap(_.body.driver.trip_earnings.trips.keySet.toList)
         .map(_.toString)
         .map(trip)
+        .toArray
 
-      println(statementPreviews.toList)
+      val map = Map("items" -> statementPreviews)
+      val mapStr = map.asJson.toString
+
+      println(mapStr)
+      val pw = new PrintWriter(new File("./cache.json"))
+      pw.write(mapStr)
+      pw.close()
 
     }) match {
       case Success(_) => println("Done")
