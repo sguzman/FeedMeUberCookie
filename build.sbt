@@ -32,7 +32,8 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % "0.9.0-M2",
   "io.circe" %% "circe-parser" % "0.9.0-M2",
   "org.feijoas" % "mango_2.12" % "0.14",
-  "org.scalaj" % "scalaj-http_2.12" % "2.3.0"
+  "org.scalaj" % "scalaj-http_2.12" % "2.3.0",
+  "com.criteo.lolhttp" % "lolhttp_2.12" % "0.8.1"
 )
 
 /** Make sure to fork on run */
