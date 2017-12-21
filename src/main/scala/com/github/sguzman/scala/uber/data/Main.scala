@@ -1,6 +1,5 @@
 package com.github.sguzman.scala.uber.data
 
-import java.io.{File, PrintWriter}
 import java.net.SocketTimeoutException
 
 import com.github.sguzman.scala.uber.data.typesafe.data.all_data.AllDataStatement
@@ -15,41 +14,45 @@ import org.feijoas.mango.common.base.Preconditions
 import scala.util.{Failure, Success}
 import scalaj.http.Http
 
+import lol.http.Server
+import lol.http._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object Main {
   def main(args: Array[String]): Unit = {
-    util.Try({
-      val response = Login.apply
-
-      val cookies = response.cookies.mkString("; ")
-      Preconditions.checkNotNull(cookies)
-
-      assertCookie(cookies)
-      val statement = getStatement(cookies, _: String)
-      val trip = getTrip(cookies, _: String)
-
-      val allData = getAllData(cookies)
-      val statementPreviews = allData
-        .par
-        .map(_.uuid)
-        .map(_.toString)
-        .map(statement)
-        .flatMap(_.body.driver.trip_earnings.trips.keySet.toList)
-        .map(_.toString)
-        .map(trip)
-        .toArray
-
-      val map = Map("items" -> statementPreviews)
-      val mapStr = map.asJson.toString
-
-      println(mapStr)
-      val pw = new PrintWriter(new File("./cache.json"))
-      pw.write(mapStr)
-      pw.close()
-
-    }) match {
-      case Success(_) => println("Done")
-      case Failure(e) => Console.err.println(e)
+    Server.listen(util.Try(System.getenv("PORT").toInt) match {
+      case Success(v) => v
+      case Failure(_) => 8888
+    }) {
+      case GET at url"/" =>
+        Ok("Ready Player 1")
+      case GET at url"/hello" =>
+        Ok("hello")
+      case _ =>
+        NotFound
     }
+  }
+
+  def data(cookies: String): String = {
+    assertCookie(cookies)
+    val statement = getStatement(cookies, _: String)
+    val trip = getTrip(cookies, _: String)
+
+    val allData = getAllData(cookies)
+    val statementPreviews = allData
+      .par
+      .map(_.uuid)
+      .map(_.toString)
+      .map(statement)
+      .flatMap(_.body.driver.trip_earnings.trips.keySet.toList)
+      .map(_.toString)
+      .map(trip)
+      .toArray
+
+    val map = Map("items" -> statementPreviews)
+    val mapStr = map.asJson.toString
+    mapStr
   }
 
   def assertCookie(cookies: String): Unit = {
