@@ -1,5 +1,5 @@
-# UberData
-A Scala server that is fed uber credentials and returns your uber trip data
+# FeedMeUberCookie
+A scala server that takes in an uber cookie and spits out uber data Edit
 
 ![A scala project](https://i.imgur.com/VdpZ4YQ.png)
 
