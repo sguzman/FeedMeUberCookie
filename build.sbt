@@ -1,5 +1,5 @@
 /** Name of project */
-name := "UberData"
+name := "FeedMeUberCookie"
 
 /** Organization */
 organization := "com.github.sguzman"
