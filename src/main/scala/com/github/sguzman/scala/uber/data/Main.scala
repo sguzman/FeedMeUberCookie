@@ -31,14 +31,7 @@ object Main {
       case request @ GET at url"/" =>
         util.Try({
           val cookie = request.headers(HttpString("X-Cookies")).toString
-          val content = if (this.cache.contains(cookie)) {
-            println("Have seen cookie before... retrieving from cache")
-            this.cache(cookie)
-          } else {
-            val dt = data(cookie)
-            this.cache.put(cookie, dt)
-            dt
-          }
+          val content = data(cookie)
 
           Ok(content).addHeaders(
             (HttpString("Access-Control-Allow-Origin"), HttpString("*")),
@@ -136,37 +129,30 @@ object Main {
 
   def getTrip(cookies: String, uuid: String): Option[Trip2] = util.Try({
     val url = s"https://partners.uber.com/p3/money/trips/trip_data/$uuid"
-    val request = Http(url).header("Cookie", cookies)
-    val response = request.asString
-
-    if (response.code == 429) {
-      getTrip(cookies, uuid)
+    if (this.tripCache.contains(url)) {
+      println(s"Found $url body in cache... retrieving")
+      Some(decode[Trip2](this.tripCache(url)).right.get)
     } else {
-      println(s"Success $url")
-      val body = decode[Trip](response.body)
-      Preconditions.checkArgument(body.isRight, s"Failed validating trips: $body")
-      util.Try({
-        val latLng = new URI(
-          body
-          .right
-          .get
-          .customRouteMap
-          .get
-        )
-          .getQuery
-          .split("&")
-          .filter(t => t.startsWith("markers="))
-          .head
-          .split("\\|")
-          .last
-          .split(",")
-          .map(_.toDouble)
+      val request = Http(url).header("Cookie", cookies)
+      val response = request.asString
 
+      if (response.code == 429) {
+        getTrip(cookies, uuid)
+      } else {
+        println(s"Success $url")
+        val body = decode[Trip](response.body)
+        Preconditions.checkArgument(body.isRight, s"Failed validating trips: $body")
+        util.Try({
+          val latLng = new URI(body.right.get.customRouteMap.get)
+            .getQuery.split("&").filter(t => t.startsWith("markers=")).head.split("\\|").last.split(",").map(_.toDouble)
 
-        Trip2(Some(latLng.head), Some(latLng.last), body.right.get)
-      }) match {
-        case Success(v) => Some(v)
-        case Failure(_) => Some(Trip2(None, None, body.right.get))
+          val tripMe = Trip2(Some(latLng.head), Some(latLng.last), body.right.get)
+          this.tripCache.put(url, tripMe.asJson.toString)
+          tripMe
+        }) match {
+          case Success(v) => Some(v)
+          case Failure(_) => Some(Trip2(None, None, body.right.get))
+        }
       }
     }
   }) match {
