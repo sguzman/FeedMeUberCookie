@@ -109,17 +109,24 @@ object Main {
 
   def getStatement(cookies: String, uuid: String): Statement = util.Try({
     val url = s"https://partners.uber.com/p3/money/statements/view/$uuid"
-    val request = Http(url).header("Cookie", cookies)
-    val response = request.asString
+    if (this.statementCache.contains(url)) {
+      println(s"Found $url body in cache... retrieving")
+      decode[Statement](this.statementCache(url)).right.get
+    } else {
+      val request = Http(url).header("Cookie", cookies)
+      val response = request.asString
 
-    if (response.code == 429) {
-      getStatement(cookies, uuid)
-    }
-    else {
-      println(s"Success $url")
-      val body = decode[Statement](response.body)
-      Preconditions.checkArgument(body.isRight, "Failed validating statements")
-      body.right.get
+      if (response.code == 429) {
+        getStatement(cookies, uuid)
+      }
+      else {
+        println(s"Success $url")
+        val body = decode[Statement](response.body)
+        this.statementCache.put(url, response.body)
+
+        Preconditions.checkArgument(body.isRight, "Failed validating statements")
+        body.right.get
+      }
     }
   }) match {
     case Success(v) => v
