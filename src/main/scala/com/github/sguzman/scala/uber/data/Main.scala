@@ -69,7 +69,7 @@ object Main {
 
     val checkBody = checkResponse.body
     val checkObj = decode[PlatformChromeNavData](checkBody)
-    Preconditions.checkArgument(checkObj.isRight)
+    Preconditions.checkArgument(checkObj.isRight, "Cookie failed validation")
   }
 
   def getAllData(cookies: String): Array[AllDataStatement] = {
@@ -79,7 +79,7 @@ object Main {
 
     val allDataBody = allDataResponse.body
     val allDataObj = decode[Array[AllDataStatement]](allDataBody)
-    Preconditions.checkArgument(allDataObj.isRight)
+    Preconditions.checkArgument(allDataObj.isRight, "Failed validating all_data request")
 
     allDataObj.right.get
   }
@@ -95,7 +95,7 @@ object Main {
     else {
       println(s"Success $url")
       val body = decode[Statement](response.body)
-      Preconditions.checkArgument(body.isRight)
+      Preconditions.checkArgument(body.isRight, "Failed validating statements")
       body.right.get
     }
   }) match {
@@ -115,7 +115,7 @@ object Main {
     } else {
       println(s"Success $url")
       val body = decode[Trip](response.body)
-      Preconditions.checkArgument(body.isRight)
+      Preconditions.checkArgument(body.isRight, "Failed validating trips")
       body.right.get
     }
   }) match {
