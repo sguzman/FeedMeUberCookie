@@ -19,6 +19,8 @@ import scalaj.http.Http
 
 object Main {
   val cache: mutable.Map[String, String] = mutable.Map[String, String]()
+  val statementCache : mutable.Map[String, String] = mutable.Map[String, String]()
+  val tripCache : mutable.Map[String, String] = mutable.Map[String, String]()
 
   def main(args: Array[String]): Unit = {
     Server.listen(util.Try(System.getenv("PORT").toInt) match {
