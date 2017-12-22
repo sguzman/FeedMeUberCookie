@@ -1,10 +1,10 @@
 package com.github.sguzman.scala.uber.data
 
-import java.net.SocketTimeoutException
+import java.net.{SocketTimeoutException, URI}
 
 import com.github.sguzman.scala.uber.data.typesafe.data.all_data.AllDataStatement
 import com.github.sguzman.scala.uber.data.typesafe.data.statement.Statement
-import com.github.sguzman.scala.uber.data.typesafe.data.trip.Trip
+import com.github.sguzman.scala.uber.data.typesafe.data.trip.{Trip, Trip2}
 import com.github.sguzman.scala.uber.data.typesafe.verify.PlatformChromeNavData
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -12,11 +12,14 @@ import io.circe.syntax._
 import lol.http.{Server, _}
 import org.feijoas.mango.common.base.Preconditions
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 import scalaj.http.Http
 
 object Main {
+  val cache = mutable.Map[String, String]()
+
   def main(args: Array[String]): Unit = {
     Server.listen(util.Try(System.getenv("PORT").toInt) match {
       case Success(v) => v
@@ -26,9 +29,17 @@ object Main {
         Ok("hello")
       case request @ GET at url"/" =>
         util.Try({
-          val x = request.headers(HttpString("X-Cookies")).toString
+          val cookie = request.headers(HttpString("X-Cookies")).toString
+          val content = if (this.cache.contains(cookie)) {
+            println("Have seen cookie before... retrieving from cache")
+            this.cache(cookie)
+          } else {
+            val dt = data(cookie)
+            this.cache.put(cookie, dt)
+            dt
+          }
 
-          Ok(data(x))
+          Ok(content)
         }) match {
           case Success(v) => v
           case Failure(e) =>
@@ -55,6 +66,7 @@ object Main {
       .flatMap(_.body.driver.trip_earnings.trips.keySet.toList)
       .map(_.toString)
       .map(trip)
+      .filter(_.isDefined)
       .toArray
 
     val map = Map("items" -> statementPreviews)
@@ -105,7 +117,7 @@ object Main {
     }
   }
 
-  def getTrip(cookies: String, uuid: String): Trip = util.Try({
+  def getTrip(cookies: String, uuid: String): Option[Trip2] = util.Try({
     val url = s"https://partners.uber.com/p3/money/trips/trip_data/$uuid"
     val request = Http(url).header("Cookie", cookies)
     val response = request.asString
@@ -115,8 +127,30 @@ object Main {
     } else {
       println(s"Success $url")
       val body = decode[Trip](response.body)
-      Preconditions.checkArgument(body.isRight, "Failed validating trips")
-      body.right.get
+      Preconditions.checkArgument(body.isRight, s"Failed validating trips: $body")
+      util.Try({
+        val latLng = new URI(
+          body
+          .right
+          .get
+          .customRouteMap
+          .get
+        )
+          .getQuery
+          .split("&")
+          .filter(t => t.startsWith("markers="))
+          .head
+          .split("\\|")
+          .last
+          .split(",")
+          .map(_.toDouble)
+
+
+        Trip2(Some(latLng.head), Some(latLng.last), body.right.get)
+      }) match {
+        case Success(v) => Some(v)
+        case Failure(_) => Some(Trip2(None, None, body.right.get))
+      }
     }
   }) match {
     case Success(v) => v
