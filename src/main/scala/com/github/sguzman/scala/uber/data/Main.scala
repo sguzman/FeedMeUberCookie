@@ -9,15 +9,12 @@ import com.github.sguzman.scala.uber.data.typesafe.verify.PlatformChromeNavData
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
+import lol.http.{Server, _}
 import org.feijoas.mango.common.base.Preconditions
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 import scalaj.http.Http
-
-import lol.http.Server
-import lol.http._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -25,10 +22,20 @@ object Main {
       case Success(v) => v
       case Failure(_) => 8888
     }) {
-      case GET at url"/" =>
-        Ok("Ready Player 1")
       case GET at url"/hello" =>
         Ok("hello")
+      case request @ GET at url"/" =>
+        util.Try({
+          val x = request.headers(HttpString("X-Cookies")).toString
+
+          Ok(data(x))
+        }) match {
+          case Success(v) => v
+          case Failure(e) =>
+            e.printStackTrace()
+            InternalServerError(e.toString)
+        }
+
       case _ =>
         NotFound
     }
