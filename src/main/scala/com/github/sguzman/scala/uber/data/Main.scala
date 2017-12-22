@@ -42,6 +42,7 @@ object Main {
           Ok(content).addHeaders(
             (HttpString("Access-Control-Allow-Origin"), HttpString("*")),
             (HttpString("Access-Control-Allow-Headers"), HttpString("Origin, X-Requested-With, Content-Type, Accept"))
+          )
         }) match {
           case Success(v) => v
           case Failure(e) =>
@@ -49,12 +50,14 @@ object Main {
             InternalServerError(e.toString).addHeaders(
               (HttpString("Access-Control-Allow-Origin"), HttpString("*")),
               (HttpString("Access-Control-Allow-Headers"), HttpString("Origin, X-Requested-With, Content-Type, Accept"))
+            )
         }
 
       case _ =>
         NotFound.addHeaders(
           (HttpString("Access-Control-Allow-Origin"), HttpString("*")),
           (HttpString("Access-Control-Allow-Headers"), HttpString("Origin, X-Requested-With, Content-Type, Accept"))
+        )
     }
   }
 
