@@ -39,16 +39,22 @@ object Main {
             dt
           }
 
-          Ok(content)
+          Ok(content).addHeaders(
+            (HttpString("Access-Control-Allow-Origin"), HttpString("*")),
+            (HttpString("Access-Control-Allow-Headers"), HttpString("Origin, X-Requested-With, Content-Type, Accept"))
         }) match {
           case Success(v) => v
           case Failure(e) =>
             e.printStackTrace()
-            InternalServerError(e.toString)
+            InternalServerError(e.toString).addHeaders(
+              (HttpString("Access-Control-Allow-Origin"), HttpString("*")),
+              (HttpString("Access-Control-Allow-Headers"), HttpString("Origin, X-Requested-With, Content-Type, Accept"))
         }
 
       case _ =>
-        NotFound
+        NotFound.addHeaders(
+          (HttpString("Access-Control-Allow-Origin"), HttpString("*")),
+          (HttpString("Access-Control-Allow-Headers"), HttpString("Origin, X-Requested-With, Content-Type, Accept"))
     }
   }
 
