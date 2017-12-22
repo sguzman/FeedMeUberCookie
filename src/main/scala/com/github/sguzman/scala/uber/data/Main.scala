@@ -18,7 +18,6 @@ import scala.util.{Failure, Success}
 import scalaj.http.Http
 
 object Main {
-  val cache: mutable.Map[String, String] = mutable.Map[String, String]()
   val statementCache : mutable.Map[String, String] = mutable.Map[String, String]()
   val tripCache : mutable.Map[String, String] = mutable.Map[String, String]()
 
