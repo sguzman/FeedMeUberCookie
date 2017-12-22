@@ -38,3 +38,5 @@ libraryDependencies ++= Seq(
 
 /** Make sure to fork on run */
 fork in run := true
+
+herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value)
